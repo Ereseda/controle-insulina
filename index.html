@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Insulina</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+
+    <meta name="theme-color" content="#1976d2">
+</head>
+<body>
+
+<header>
+    <h1>💉 Controle de Insulina</h1>
+</header>
+
+<main>
+
+    <!-- REGISTRO -->
+    <section class="card">
+        <h2>Registrar Glicemia</h2>
+        <input type="text" id="nomePaciente" placeholder="Nome do Paciente">
+        <input type="number" id="glicemiaValor" placeholder="Valor (mg/dL)">
+        <select id="periodoGlicemia">
+            <option value="Manhã">Manhã</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noite">Noite</option>
+        </select>
+
+        <select id="tipoInsulina">
+            <option value="Rápida">Rápida</option>
+            <option value="Lenta">Lenta</option>
+        </select>
+
+        <input type="number" id="doseInsulina" placeholder="Unidades (opcional)">
+      
+
+        <button onclick="registrarGlicemia()">Salvar</button>
+    </section>
+
+    <!-- ÚLTIMO -->
+    <section class="card">
+        <h2>Último Registro</h2>
+        <p id="ultimaGlicemia">Nenhum registro</p>
+    </section>
+
+    <!-- MÉDIA -->
+    <section class="card">
+        <h2>Média de Hoje</h2>
+        <p id="mediaHoje">Nenhum dado</p>
+    </section>
+
+    <!-- STATUS -->
+    <section class="card" id="cardStatus">
+        <h2>Status Atual</h2>
+        <p id="statusGlicemia">---</p>
+    </section>
+
+    <!-- GRÁFICO -->
+    <section class="card">
+        <h2>Evolução de Hoje</h2>
+        <canvas id="graficoGlicemia"></canvas>
+    </section>
+
+    <!-- HISTÓRICO RESUMIDO -->
+    <section class="card">
+        <h2>Histórico</h2>
+        <ul id="listaGlicemias"></ul>
+
+        <button onclick="abrirModalHistorico()" class="btn-secundario">
+            Ver histórico completo
+        </button>
+    </section>
+
+    <!-- RESUMO -->
+    <section class="card">
+        <h2>Resumo do Dia</h2>
+        <p id="resumoDia">Nenhum dado hoje.</p>
+    </section>
+
+    <!-- AVISO -->
+    <section class="card aviso">
+        ⚠️ Este aplicativo não substitui orientação médica.
+    </section>
+
+</main>
+
+<!-- MODAL HISTÓRICO -->
+<div id="modalHistorico" class="modal" style="display:none;" onclick="fecharAoClicarFora(event)">
+    <div class="modal-conteudo" onclick="event.stopPropagation()">
+
+        <h2>Histórico Completo</h2>
+
+        <input type="date"
+               id="filtroData"
+               onchange="filtrarHistorico()"
+               class="input-filtro">
+
+        <ul id="listaCompleta"></ul>
+
+        <button onclick="exportarPDF()" class="btn-secundario">
+            Exportar PDF
+        </button>
+
+        <button onclick="exportarCSV()" class="btn-secundario">
+            Exportar CSV
+        </button>
+
+        <button onclick="limparHistorico()" class="btn-perigo">
+            Limpar Histórico
+        </button>
+
+        <button onclick="fecharModalHistorico()" class="btn-secundario">
+            Fechar
+        </button>
+
+    </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div id="modalConfirmar" class="modal" style="display:none;">
+    <div class="modal-conteudo alerta">
+
+        <div class="icone-alerta">⚠</div>
+
+        <h3>Atenção</h3>
+        <p>Para limpar todo o histórico, digite <strong>CONFIRMAR</strong> abaixo:</p>
+
+        <input type="text"
+               id="inputConfirmar"
+               placeholder="Digite CONFIRMAR"
+               oninput="verificarConfirmacao()">
+
+        <div class="modal-botoes">
+            <button class="btn-cancelar"
+                    onclick="fecharModalConfirmar()">
+                Cancelar
+            </button>
+
+            <button id="btnConfirmarLimpeza"
+                    class="btn-confirmar"
+                    onclick="confirmarLimpeza()"
+                    disabled>
+                Sim, limpar
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- SCRIPTS (ORDEM CORRETA) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js")
+        .then(() => console.log("Service Worker registrado"))
+        .catch(err => console.log("Erro SW:", err));
+}
+</script>
+
+</body>
+</html>

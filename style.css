@@ -1,0 +1,143 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f8;
+}
+
+header {
+    background: #1976d2;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+main {
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+    margin-top: 0;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.aviso {
+    background: #fff3cd;
+}
+.baixo {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.normal {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.alto {
+    color: #f57c00;
+    font-weight: bold;
+}
+.normal {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.leve {
+    color: #f9a825;
+    font-weight: bold;
+}
+
+.moderado {
+    color: #ef6c00;
+    font-weight: bold;
+}
+
+.critico {
+    color: #c62828;
+    font-weight: bold;
+}
+
+.normal { color: #2e7d32; font-weight: bold; }
+.leve { color: #f9a825; font-weight: bold; }
+.moderado { color: #ef6c00; font-weight: bold; }
+.critico { color: #c62828; font-weight: bold; }
+
+.card-normal { background-color: #e8f5e9; }
+.card-leve { background-color: #fffde7; }
+.card-moderado { background-color: #fff3e0; }
+.card-critico { background-color: #ffebee; }
+
+.card-alerta {
+    border: 2px solid #c62828;
+    background-color: #ffebee;
+}
+/* OVERLAY */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* CONTEÚDO */
+.modal-conteudo {
+    background: #ffffff;
+    width: 90%;
+    max-width: 420px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    animation: fadeInModal 0.25s ease;
+}
+
+/* ANIMAÇÃO SUAVE */
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* BOTÕES DO MODAL */
+.modal-conteudo button {
+    width: 100%;
+    margin-top: 10px;
+}
