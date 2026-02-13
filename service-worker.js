@@ -1,12 +1,13 @@
-const CACHE_NAME = "insulina-v1";
+const CACHE_NAME = "insulina-v2";
 
 const urlsToCache = [
     "./",
     "./index.html",
     "./style.css",
     "./app.js",
-    "./favicon-192.ico",
-    "./favicon-512.ico"
+    "./manifest.json",
+    "./icon-192.png",
+    "./icon-512.png"
 ];
 
 self.addEventListener("install", event => {

@@ -1,20 +1,30 @@
 {
   "name": "Controle de Insulina",
   "short_name": "Insulina",
+  "description": "Aplicativo para controle diário de glicemia e insulina.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "favicon-192.ico",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
-      "src": "favicon-512.ico",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/x-icon"
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
