@@ -1,235 +1,242 @@
-let grafico;
-let registros = JSON.parse(localStorage.getItem("registros")) || [];
+let listaRegistros = JSON.parse(localStorage.getItem("registros")) || [];
+let grafico = null;
 
-document.addEventListener("DOMContentLoaded", () => {
-    atualizarTela();
-});
-
-/* ============================= */
-/* SALVAR */
-/* ============================= */
-
-function salvarDados() {
-    localStorage.setItem("registros", JSON.stringify(registros));
+/* =========================
+   SALVAR LOCALSTORAGE
+========================= */
+function salvarLocalStorage() {
+    localStorage.setItem("registros", JSON.stringify(listaRegistros));
 }
 
-/* ============================= */
-/* REGISTRAR */
-/* ============================= */
-
+/* =========================
+   REGISTRAR GLICEMIA
+========================= */
 function registrarGlicemia() {
 
-    const valor = Number(document.getElementById("glicemiaValor").value);
+    const nome = document.getElementById("nomePaciente").value.trim();
+    const valorInput = document.getElementById("glicemiaValor").value;
+    const valor = parseFloat(valorInput);
     const periodo = document.getElementById("periodoGlicemia").value;
-    const tipoInsulina = document.getElementById("tipoInsulina").value;
-    const dose = Number(document.getElementById("doseInsulina").value);
+    const tipo = document.getElementById("tipoInsulina").value;
+    const dose = document.getElementById("doseInsulina").value;
 
-    if (!valor || valor <= 0) return;
+    if (!nome || valorInput.trim() === "" || isNaN(valor)) {
+        mostrarModalAlerta("Preencha nome e valor corretamente!");
+        return;
+    }
 
-    const agora = new Date();
+    if (valor <= 0) {
+        mostrarModalAlerta("O valor deve ser maior que zero!");
+        return;
+    }
 
-    registros.push({
+    const registro = {
+        nome,
         valor,
         periodo,
-        tipoInsulina,
-        dose: dose || null,
-        data: agora.toISOString().split("T")[0],
-        hora: agora.toLocaleTimeString()
-    });
+        tipo,
+        dose,
+        data: new Date().toLocaleString(),
+        dataISO: new Date().toISOString().split("T")[0]
+    };
 
-    salvarDados();
+    listaRegistros.push(registro);
+    salvarLocalStorage();
+    atualizarInterface();
 
     document.getElementById("glicemiaValor").value = "";
     document.getElementById("doseInsulina").value = "";
-
-    atualizarTela();
 }
 
-/* ============================= */
-/* ATUALIZA TELA */
-/* ============================= */
-
-function atualizarTela() {
-    atualizarUltimoRegistro();
-    atualizarMediaHoje();
+/* =========================
+   ATUALIZAR INTERFACE
+========================= */
+function atualizarInterface() {
+    atualizarUltimo();
+    atualizarMedia();
     atualizarStatus();
-    atualizarHistorico();
     atualizarGrafico();
-    atualizarResumoDia();
+    atualizarLista();
 }
 
-/* ============================= */
-/* ÚLTIMO REGISTRO */
-/* ============================= */
-
-function atualizarUltimoRegistro() {
-
+/* =========================
+   ÚLTIMO REGISTRO
+========================= */
+function atualizarUltimo() {
     const el = document.getElementById("ultimaGlicemia");
 
-    if (!registros.length) {
-        el.textContent = "Nenhum registro encontrado.";
+    if (listaRegistros.length === 0) {
+        el.textContent = "Nenhum registro";
         return;
     }
 
-    const ultimo = registros[registros.length - 1];
+    const r = listaRegistros[listaRegistros.length - 1];
 
-    el.textContent =
-        `${ultimo.valor} mg/dL - ${ultimo.periodo} - ${ultimo.data} ${ultimo.hora}`;
+    el.innerHTML = `
+        <strong>Paciente:</strong> ${r.nome}<br>
+        <strong>Glicemia:</strong> ${r.valor} mg/dL<br>
+        <strong>Período:</strong> ${r.periodo}<br>
+        <strong>Tipo:</strong> ${r.tipo}<br>
+        <strong>Dose:</strong> ${r.dose || "—"}<br>
+        <strong>Data:</strong> ${r.data}
+    `;
 }
 
-/* ============================= */
-/* MÉDIA */
-/* ============================= */
-
-function atualizarMediaHoje() {
-
-    const hoje = new Date().toISOString().split("T")[0];
-    const hojeReg = registros.filter(r => r.data === hoje);
-
+/* =========================
+   MÉDIA
+========================= */
+function atualizarMedia() {
     const el = document.getElementById("mediaHoje");
 
-    if (!registros.length) {
-        el.innerHTML = "<em>Base de dados vazia.</em>";
+    if (listaRegistros.length === 0) {
+        el.textContent = "Nenhum dado";
         return;
     }
 
-    if (!hojeReg.length) {
-        el.innerHTML = "<em>Nenhuma medição registrada hoje.</em>";
-        return;
-    }
-
-    const soma = hojeReg.reduce((a, b) => a + Number(b.valor), 0);
-    const media = (soma / hojeReg.length).toFixed(1);
+    const soma = listaRegistros.reduce((acc, r) => acc + r.valor, 0);
+    const media = (soma / listaRegistros.length).toFixed(1);
 
     el.textContent = `${media} mg/dL`;
 }
 
-/* ============================= */
-/* STATUS */
-/* ============================= */
-
+/* =========================
+   STATUS
+========================= */
 function atualizarStatus() {
-
     const el = document.getElementById("statusGlicemia");
     const card = document.getElementById("cardStatus");
 
-    if (!registros.length) {
-        el.textContent = "Sem dados";
-        card.className = "card";
+    if (listaRegistros.length === 0) {
+        el.textContent = "---";
         return;
     }
 
-    const ultimo = Number(registros[registros.length - 1].valor);
+    const valor = listaRegistros[listaRegistros.length - 1].valor;
 
-    let texto = "";
-    let classe = "card";
-
-    if (ultimo <= 60) {
-        texto = "Crítico Baixo 🔴";
-        classe += " card-critico";
+    if (valor < 70) {
+        el.textContent = "Hipoglicemia";
+        card.style.background = "#ffcccc";
+    } else if (valor <= 180) {
+        el.textContent = "Normal";
+        card.style.background = "#ccffcc";
+    } else {
+        el.textContent = "Hiperglicemia";
+        card.style.background = "#ffe0b3";
     }
-    else if (ultimo <= 140) {
-        texto = "Normal 🟢";
-        classe += " card-normal";
-    }
-    else if (ultimo <= 200) {
-        texto = "Alto 🟡";
-        classe += " card-leve";
-    }
-    else {
-        texto = "Crítico Alto 🔴";
-        classe += " card-critico";
-    }
-
-    el.textContent = texto;
-    card.className = classe;
 }
 
-/* ============================= */
-/* HISTÓRICO */
-/* ============================= */
+/* =========================
+   GRÁFICO
+========================= */
+function atualizarGrafico() {
+    const ctx = document.getElementById("graficoGlicemia");
 
-function atualizarHistorico() {
+    if (!ctx) return;
 
-    const lista = document.getElementById("listaGlicemias");
-    lista.innerHTML = "";
+    if (grafico) grafico.destroy();
 
-    if (!registros.length) {
-        const li = document.createElement("li");
-        li.textContent = "Nenhum registro encontrado.";
-        li.style.opacity = "0.6";
-        li.style.fontStyle = "italic";
-        lista.appendChild(li);
-        return;
-    }
-
-    registros.slice(-10).reverse().forEach(r => {
-
-        const li = document.createElement("li");
-        li.textContent =
-            `${r.valor} mg/dL - ${r.periodo} - ${r.data} ${r.hora}`;
-
-        lista.appendChild(li);
-    });
-}
-
-/* ============================= */
-/* MODAL HISTÓRICO */
-/* ============================= */
-
-function abrirModalHistorico() {
-
-    const modal = document.getElementById("modalHistorico");
-    const lista = document.getElementById("listaCompleta");
-
-    lista.innerHTML = "";
-
-    if (!registros.length) {
-        const li = document.createElement("li");
-        li.textContent = "Nenhum dado salvo na base.";
-        li.style.opacity = "0.6";
-        li.style.fontStyle = "italic";
-        lista.appendChild(li);
-
-        modal.style.display = "flex";
-        return;
-    }
-
-    registros.slice().reverse().forEach(r => {
-
-        const li = document.createElement("li");
-
-        if (r.valor <= 60 || r.valor > 250) {
-            li.style.color = "#c62828";
-            li.style.fontWeight = "bold";
+    grafico = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: listaRegistros.map(r => r.periodo),
+            datasets: [{
+                label: "Glicemia",
+                data: listaRegistros.map(r => r.valor),
+                borderColor: "#2563eb",
+                tension: 0.3,
+                fill: false
+            }]
         }
-
-        li.textContent =
-            `${r.valor} mg/dL - ${r.periodo} - ${r.data} ${r.hora}`;
-
-        lista.appendChild(li);
     });
+}
 
-    modal.style.display = "flex";
+/* =========================
+   HISTÓRICO RESUMIDO
+========================= */
+function atualizarLista() {
+    const ul = document.getElementById("listaGlicemias");
+    ul.innerHTML = "";
+
+    listaRegistros.slice(-5).forEach(r => {
+        const li = document.createElement("li");
+        li.textContent = `${r.data} - ${r.valor} mg/dL`;
+        ul.appendChild(li);
+    });
+}
+
+/* =========================
+   MODAL HISTÓRICO
+========================= */
+function abrirModalHistorico() {
+    document.getElementById("modalHistorico").style.display = "flex";
+    atualizarListaCompleta();
 }
 
 function fecharModalHistorico() {
     document.getElementById("modalHistorico").style.display = "none";
 }
 
-function fecharAoClicarFora(e) {
-    if (e.target.id === "modalHistorico") {
+function fecharAoClicarFora(event) {
+    if (event.target.id === "modalHistorico") {
         fecharModalHistorico();
     }
 }
 
-/* ============================= */
-/* LIMPAR COM CONFIRMAR */
-/* ============================= */
+function atualizarListaCompleta(filtro = null) {
+    const ul = document.getElementById("listaCompleta");
+    ul.innerHTML = "";
 
+    let dados = listaRegistros;
+
+    if (filtro) {
+        dados = listaRegistros.filter(r => r.dataISO === filtro);
+    }
+
+    dados.forEach(r => {
+        const li = document.createElement("li");
+        li.textContent = `${r.data} - ${r.valor} mg/dL`;
+        ul.appendChild(li);
+    });
+}
+
+function filtrarHistorico() {
+    const data = document.getElementById("filtroData").value;
+    atualizarListaCompleta(data);
+}
+
+/* =========================
+   EXPORTAR PDF
+========================= */
+function exportarPDF() {
+    if (listaRegistros.length === 0) {
+        mostrarModalAlerta("Nenhum registro para exportar.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(14);
+    doc.text("Histórico de Glicemia", 10, 10);
+
+    let y = 20;
+
+    listaRegistros.forEach((r, i) => {
+        doc.text(
+            `${i + 1}. ${r.data} - ${r.valor} mg/dL - ${r.periodo}`,
+            10,
+            y
+        );
+        y += 8;
+    });
+
+    doc.save("historico_glicemia.pdf");
+}
+
+/* =========================
+   LIMPAR HISTÓRICO
+========================= */
 function limparHistorico() {
-    document.getElementById("inputConfirmar").value = "";
-    document.getElementById("btnConfirmarLimpeza").disabled = true;
     document.getElementById("modalConfirmar").style.display = "flex";
 }
 
@@ -238,252 +245,32 @@ function fecharModalConfirmar() {
 }
 
 function verificarConfirmacao() {
-    const texto = document.getElementById("inputConfirmar").value.trim();
-    const botao = document.getElementById("btnConfirmarLimpeza");
-    botao.disabled = texto !== "CONFIRMAR";
+    const input = document.getElementById("inputConfirmar").value;
+    const btn = document.getElementById("btnConfirmarLimpeza");
+    btn.disabled = input !== "CONFIRMAR";
 }
 
 function confirmarLimpeza() {
-    registros = [];
-    salvarDados();
-    atualizarTela();
+    listaRegistros = [];
+    salvarLocalStorage();
     fecharModalConfirmar();
     fecharModalHistorico();
+    atualizarInterface();
 }
 
-/* ============================= */
-/* EXPORTAR CSV */
-/* ============================= */
-
-function exportarCSV() {
-
-    if (!registros.length) {
-        alert("Não há dados para exportar.");
-        return;
-    }
-
-    let csv = "Valor (mg/dL),Periodo,Tipo Insulina,Dose,Data,Hora\n";
-
-    registros.forEach(r => {
-        csv += `${r.valor},${r.periodo},${r.tipoInsulina || ""},${r.dose || ""},${r.data},${r.hora}\n`;
-    });
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `historico_glicemia_${new Date().toISOString().split("T")[0]}.csv`;
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+/* =========================
+   MODAL ALERTA
+========================= */
+function mostrarModalAlerta(mensagem) {
+    document.getElementById("mensagemAlerta").textContent = mensagem;
+    document.getElementById("modalAlerta").style.display = "flex";
 }
 
-/* ============================= */
-/* EXPORTAR PDF */
-/* ============================= */
-function exportarPDF() {
-
-    if (!registros.length) {
-        alert("Não há dados para exportar.");
-        return;
-    }
-
-    if (!window.jspdf) {
-        alert("Biblioteca PDF não carregada.");
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    const nomePaciente = document.getElementById("nomePaciente").value || "Não informado";
-    const hojeFormatado = new Date().toLocaleDateString();
-
-    /* ===========================
-       CABEÇALHO
-    ============================ */
-
-    doc.setFontSize(18);
-    doc.setTextColor(25, 118, 210);
-    doc.text("Relatório de Monitoramento Glicêmico", 105, 20, null, null, "center");
-
-    doc.setFontSize(11);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Paciente: ${nomePaciente}`, 20, 35);
-    doc.text(`Data de emissão: ${hojeFormatado}`, 20, 42);
-
-    /* ===========================
-       RESUMO
-    ============================ */
-
-    const valores = registros.map(r => r.valor);
-    const maior = Math.max(...valores);
-    const menor = Math.min(...valores);
-    const media = (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(1);
-
-    doc.setFontSize(12);
-    doc.text("Resumo Geral:", 20, 55);
-
-    doc.setFontSize(10);
-    doc.text(`Total de medições: ${registros.length}`, 20, 63);
-    doc.text(`Média: ${media} mg/dL`, 20, 69);
-    doc.text(`Maior valor: ${maior} mg/dL`, 20, 75);
-    doc.text(`Menor valor: ${menor} mg/dL`, 20, 81);
-
-    /* ===========================
-       GRÁFICO
-    ============================ */
-
-    const canvas = document.getElementById("graficoGlicemia");
-
-    if (canvas) {
-        const imgData = canvas.toDataURL("image/png");
-        doc.addImage(imgData, "PNG", 20, 90, 170, 60);
-    }
-
-    /* ===========================
-       TABELA
-    ============================ */
-
-    let y = 160;
-
-    doc.setFontSize(12);
-    doc.text("Histórico de Registros:", 20, y);
-    y += 8;
-
-    doc.setFontSize(9);
-
-    // Cabeçalho da tabela
-    doc.setFillColor(230, 230, 230);
-    doc.rect(20, y - 5, 170, 8, "F");
-
-    doc.setTextColor(0, 0, 0);
-    doc.text("Valor", 22, y);
-    doc.text("Período", 50, y);
-    doc.text("Data", 90, y);
-    doc.text("Hora", 130, y);
-
-    y += 10;
-
-    registros.forEach(r => {
-
-        if (y > 280) {
-            doc.addPage();
-            y = 20;
-        }
-
-        if (r.valor <= 60 || r.valor > 250) {
-            doc.setTextColor(200, 0, 0);
-        } else {
-            doc.setTextColor(0, 0, 0);
-        }
-
-        doc.text(`${r.valor} mg/dL`, 22, y);
-        doc.text(`${r.periodo}`, 50, y);
-        doc.text(`${r.data}`, 90, y);
-        doc.text(`${r.hora}`, 130, y);
-
-        y += 7;
-    });
-
-    /* ===========================
-       RODAPÉ
-    ============================ */
-
-    doc.setFontSize(8);
-    doc.setTextColor(120);
-    doc.text(
-        "Este relatório é apenas informativo e não substitui avaliação médica profissional.",
-        105,
-        290,
-        null,
-        null,
-        "center"
-    );
-
-    doc.save("relatorio_clinico_glicemia.pdf");
-}
-/* ============================= */
-/* GRÁFICO */
-/* ============================= */
-
-function atualizarGrafico() {
-
-    const canvas = document.getElementById("graficoGlicemia");
-    if (!canvas) return;
-
-    const hoje = new Date().toISOString().split("T")[0];
-
-    const hojeReg = registros
-        .filter(r => r.data === hoje)
-        .sort((a, b) => a.hora.localeCompare(b.hora));
-
-    if (!hojeReg.length) {
-        if (grafico) grafico.destroy();
-        return;
-    }
-
-    const labels = hojeReg.map(r => r.hora);
-    const valores = hojeReg.map(r => r.valor);
-
-    if (grafico) grafico.destroy();
-
-    grafico = new Chart(canvas, {
-        type: "line",
-        data: {
-            labels,
-            datasets: [{
-                label: "Glicemia (mg/dL)",
-                data: valores,
-                borderColor: "#1976d2",
-                tension: 0.3
-            }]
-        }
-    });
+function fecharModalAlerta() {
+    document.getElementById("modalAlerta").style.display = "none";
 }
 
-/* ============================= */
-/* RESUMO */
-/* ============================= */
-
-function atualizarResumoDia() {
-
-    const el = document.getElementById("resumoDia");
-    const hoje = new Date().toISOString().split("T")[0];
-
-    if (!registros.length) {
-        el.innerHTML = "<em>Nenhum dado registrado na base.</em>";
-        return;
-    }
-
-    const hojeReg = registros.filter(r => r.data === hoje);
-
-    if (!hojeReg.length) {
-        el.innerHTML = "<em>Nenhuma medição registrada hoje.</em>";
-        return;
-    }
-
-    const valores = hojeReg.map(r => r.valor);
-
-    const total = valores.length;
-    const maior = Math.max(...valores);
-    const menor = Math.min(...valores);
-
-    el.innerHTML = `
-        <strong>${total}</strong> medições hoje<br>
-        Maior valor: <strong>${maior} mg/dL</strong><br>
-        Menor valor: <strong>${menor} mg/dL</strong>
-    `;
-}
-
-const urlsToCache = [
-    "./",
-    "./index.html",
-    "./style.css",
-    "./app.js",
-    "./manifest.json",
-    "./icons/icon-192.png",
-    "./icons/icon-512.png"
-];
+/* =========================
+   INICIALIZAÇÃO
+========================= */
+document.addEventListener("DOMContentLoaded", atualizarInterface);

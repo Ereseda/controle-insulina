@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Insulina</title>
 
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+    <!-- Favicon -->
+    <link rel="icon" href="favicon-512.ico" type="image/x-icon">
 
-    <meta name="theme-color" content="#1976d2">
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -21,8 +26,17 @@
     <!-- REGISTRO -->
     <section class="card">
         <h2>Registrar Glicemia</h2>
-        <input type="text" id="nomePaciente" placeholder="Nome do Paciente">
-        <input type="number" id="glicemiaValor" placeholder="Valor (mg/dL)">
+
+        <input type="text"
+               id="nomePaciente"
+               placeholder="Nome do Paciente">
+
+        <input type="number"
+               id="glicemiaValor"
+               placeholder="Valor (mg/dL)"
+               min="1"
+               step="1">
+
         <select id="periodoGlicemia">
             <option value="Manhã">Manhã</option>
             <option value="Tarde">Tarde</option>
@@ -34,13 +48,18 @@
             <option value="Lenta">Lenta</option>
         </select>
 
-        <input type="number" id="doseInsulina" placeholder="Unidades (opcional)">
-      
+        <input type="number"
+               id="doseInsulina"
+               placeholder="Unidades (opcional)"
+               min="0"
+               step="1">
 
-        <button onclick="registrarGlicemia()">Salvar</button>
+        <button onclick="registrarGlicemia()">
+            Salvar
+        </button>
     </section>
 
-    <!-- ÚLTIMO -->
+    <!-- ÚLTIMO REGISTRO -->
     <section class="card">
         <h2>Último Registro</h2>
         <p id="ultimaGlicemia">Nenhum registro</p>
@@ -88,8 +107,13 @@
 </main>
 
 <!-- MODAL HISTÓRICO -->
-<div id="modalHistorico" class="modal" style="display:none;" onclick="fecharAoClicarFora(event)">
-    <div class="modal-conteudo" onclick="event.stopPropagation()">
+<div id="modalHistorico"
+     class="modal"
+     style="display:none;"
+     onclick="fecharAoClicarFora(event)">
+
+    <div class="modal-conteudo"
+         onclick="event.stopPropagation()">
 
         <h2>Histórico Completo</h2>
 
@@ -104,10 +128,6 @@
             Exportar PDF
         </button>
 
-        <button onclick="exportarCSV()" class="btn-secundario">
-            Exportar CSV
-        </button>
-
         <button onclick="limparHistorico()" class="btn-perigo">
             Limpar Histórico
         </button>
@@ -120,7 +140,10 @@
 </div>
 
 <!-- MODAL CONFIRMAÇÃO -->
-<div id="modalConfirmar" class="modal" style="display:none;">
+<div id="modalConfirmar"
+     class="modal"
+     style="display:none;">
+
     <div class="modal-conteudo alerta">
 
         <div class="icone-alerta">⚠</div>
@@ -134,6 +157,7 @@
                oninput="verificarConfirmacao()">
 
         <div class="modal-botoes">
+
             <button class="btn-cancelar"
                     onclick="fecharModalConfirmar()">
                 Cancelar
@@ -145,19 +169,42 @@
                     disabled>
                 Sim, limpar
             </button>
+
         </div>
 
     </div>
 </div>
 
-<!-- SCRIPTS (ORDEM CORRETA) -->
+<!-- MODAL ALERTA -->
+<div id="modalAlerta"
+     class="modal"
+     style="display:none;">
+
+    <div class="modal-conteudo alerta">
+
+        <div class="icone-alerta">⚠</div>
+
+        <h3>Atenção</h3>
+
+        <p id="mensagemAlerta">Mensagem aqui</p>
+
+        <button class="btn-confirmar"
+                onclick="fecharModalAlerta()">
+            OK
+        </button>
+
+    </div>
+</div>
+
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="app.js"></script>
+
 <script>
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js")
-        .then(() => console.log("Service Worker registrado"))
+    navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker registrado com sucesso"))
         .catch(err => console.log("Erro SW:", err));
 }
 </script>

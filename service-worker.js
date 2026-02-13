@@ -1,39 +1,24 @@
-const CACHE_NAME = "insulina-cache-v2";
+const CACHE_NAME = "insulina-v1";
 
 const urlsToCache = [
     "./",
     "./index.html",
     "./style.css",
     "./app.js",
-    "./manifest.json"
+    "./favicon-192.ico",
+    "./favicon-512.ico"
 ];
 
 self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log("Arquivos em cache");
-                return cache.addAll(urlsToCache);
-            })
-    );
-});
-
-self.addEventListener("activate", event => {
-    event.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(
-                keys.filter(key => key !== CACHE_NAME)
-                    .map(key => caches.delete(key))
-            );
-        })
+            .then(cache => cache.addAll(urlsToCache))
     );
 });
 
 self.addEventListener("fetch", event => {
     event.respondWith(
         caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request);
-            })
+            .then(response => response || fetch(event.request))
     );
 });

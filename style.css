@@ -141,3 +141,41 @@ button:hover {
     width: 100%;
     margin-top: 10px;
 }
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-conteudo {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+}
+
+.modal-conteudo.alerta {
+    border-top: 5px solid #e74c3c;
+}
+
+.icone-alerta {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.btn-confirmar {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+    cursor: pointer;
+}
